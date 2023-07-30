@@ -1,10 +1,11 @@
 package org.voiculescu.reflection.c05;
 
+import lombok.Data;
 import lombok.Getter;
 
 import java.util.Date;
 
-@Getter
+@Data
 public class Product {
     private double price;
     private String name;

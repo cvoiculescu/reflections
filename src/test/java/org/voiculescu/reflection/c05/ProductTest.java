@@ -1,17 +1,40 @@
 package org.voiculescu.reflection.c05;
 
 
+import lombok.SneakyThrows;
+
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 class ProductTest {
 
     public static void main(String[] args) {
         getGetters(Product.class);
+        System.out.println("---------------------------");
+        testSetters(Product.class);
+    }
+
+    public static void testSetters(Class<?> clazz) {
+
+        List<Method> collect = Arrays.stream(clazz.getDeclaredFields())
+                .map(field -> {
+                    String setterName = "set" + capitalizeFirstLetter(field.getName());
+                    try {
+                        return clazz.getMethod(setterName, field.getType());
+                    } catch (NoSuchMethodException e) {
+                        System.err.printf("Setter: %s not found", setterName);
+                    }
+                    return null;
+                })
+                .collect(Collectors.toList());
+        collect.forEach(System.out::println);
+
     }
 
     public static void getGetters(Class<?> clazz) {
