@@ -2,27 +2,25 @@ package org.voiculescu.reflection.c05;
 
 
 import lombok.SneakyThrows;
+import org.voiculescu.reflection.c05.inherit.ClothingProduct;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 class ProductTest {
 
     public static void main(String[] args) {
-        getGetters(Product.class);
+        getGetters(ClothingProduct.class);
         System.out.println("---------------------------");
-        testSetters(Product.class);
+        testSetters(ClothingProduct.class);
     }
 
     public static void testSetters(Class<?> clazz) {
 
-        List<Method> collect = Arrays.stream(clazz.getDeclaredFields())
+        List<Method> collect = getAllFields(clazz).stream()
                 .map(field -> {
                     String setterName = "set" + capitalizeFirstLetter(field.getName());
                     try {
@@ -37,8 +35,20 @@ class ProductTest {
 
     }
 
+    private static List<Field> getAllFields(Class<?> clazz) {
+        if (clazz == null || clazz.equals(Object.class)) {
+            return Collections.emptyList();
+        }
+        Field[] currentClassFields = clazz.getDeclaredFields();
+        List<Field> inheritedFields = getAllFields(clazz.getSuperclass());
+        Set<Field> allFields = new HashSet<>();
+        allFields.addAll(Arrays.asList(currentClassFields));
+        allFields.addAll(inheritedFields);
+        return new ArrayList<>(allFields);
+    }
+
     public static void getGetters(Class<?> clazz) {
-        List<Object> getterNames = Arrays.stream(clazz.getDeclaredFields())
+        List<Object> getterNames = getAllFields(clazz).stream()
                 .map(Field::getName)
                 .map(fieldName -> "get" + capitalizeFirstLetter(fieldName))
                 .collect(Collectors.toList());
