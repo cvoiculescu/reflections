@@ -1,7 +1,10 @@
 package org.voiculescu.reflection.c07;
 
+import lombok.SneakyThrows;
 import org.voiculescu.reflection.c07.annotations.InitializerClass;
 import org.voiculescu.reflection.c07.annotations.InitializerMethod;
+import org.voiculescu.reflection.c07.annotations.RetryOperation;
+import org.voiculescu.reflection.c07.annotations.ScanPackages;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
@@ -12,20 +15,26 @@ import java.nio.file.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
-/**
- * Annotations - Application Initialization
- * https://www.udemy.com/course/java-reflection-master-class
- */
+@ScanPackages({"org.voiculescu.reflection.c07.app",
+        "org.voiculescu.reflection.c07.app.configs",
+        "org.voiculescu.reflection.c07.app.databases",
+        "org.voiculescu.reflection.c07.app.http"})
 public class Main {
 
     public static void main(String[] args) throws Throwable {
         initialize("org.voiculescu.reflection.c07.app", "org.voiculescu.reflection.c07.app.configs", "org.voiculescu.reflection.c07.app.databases", "org.voiculescu.reflection.c07.app.http");
     }
 
-    public static void initialize(String... packageNames) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException, ClassNotFoundException, IOException, URISyntaxException {
-        List<Class<?>> classes = getAllClasses(packageNames);
+    @SneakyThrows
+    public static void initialize(String... packageNames) {
+        ScanPackages scanPackages = Main.class.getAnnotation(ScanPackages.class);
+        if (scanPackages == null || scanPackages.value().length == 0) {
+            return;
+        }
+        List<Class<?>> classes = getAllClasses(scanPackages.value());
 
         for (Class<?> clazz : classes) {
             if (!clazz.isAnnotationPresent(InitializerClass.class)) {
@@ -37,7 +46,30 @@ public class Main {
             Object instance = clazz.getDeclaredConstructor().newInstance();
 
             for (Method method : methods) {
+                callInitializingMethod(instance, method);
+            }
+        }
+    }
+
+    @SneakyThrows
+    private static void callInitializingMethod(Object instance, Method method) {
+        RetryOperation retryOperation = method.getAnnotation(RetryOperation.class);
+        int numberOfRetries = retryOperation == null ? 0 : retryOperation.numberOfRetries();
+        while (true) {
+            try {
                 method.invoke(instance);
+                break;
+            } catch (InvocationTargetException e) {
+                Throwable targetException = e.getTargetException();
+                if (numberOfRetries > 0 && Set.of(retryOperation.retryExceptions()).contains(targetException.getClass())) {
+                    numberOfRetries--;
+                    System.out.println("Retrying...");
+                    Thread.sleep(retryOperation.durationBetweenRetriesMs());
+                } else if (retryOperation != null) {
+                    throw new Exception(retryOperation.failureMessage(), targetException);
+                } else {
+                    throw targetException;
+                }
             }
         }
     }
@@ -80,9 +112,7 @@ public class Main {
             return Collections.emptyList();
         }
 
-        List<Path> files = Files.list(packagePath)
-                .filter(Files::isRegularFile)
-                .collect(Collectors.toList());
+        List<Path> files = Files.list(packagePath).filter(Files::isRegularFile).collect(Collectors.toList());
 
         List<Class<?>> classes = new ArrayList<>();
 
@@ -90,9 +120,7 @@ public class Main {
             String fileName = filePath.getFileName().toString();
 
             if (fileName.endsWith(".class")) {
-                String classFullName = packageName.isBlank() ?
-                        fileName.replaceFirst("\\.class$", "")
-                        : packageName + "." + fileName.replaceFirst("\\.class$", "");
+                String classFullName = packageName.isBlank() ? fileName.replaceFirst("\\.class$", "") : packageName + "." + fileName.replaceFirst("\\.class$", "");
 
                 Class<?> clazz = Class.forName(classFullName);
                 classes.add(clazz);
