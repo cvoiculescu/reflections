@@ -12,10 +12,7 @@ import java.lang.reflect.Method;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.*;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @ScanPackages({"org.voiculescu.reflection.c07.app",
@@ -75,13 +72,9 @@ public class Main {
     }
 
     private static List<Method> getAllInitializingMethods(Class<?> clazz) {
-        List<Method> initializingMethods = new ArrayList<>();
-        for (Method method : clazz.getDeclaredMethods()) {
-            if (method.isAnnotationPresent(InitializerMethod.class)) {
-                initializingMethods.add(method);
-            }
-        }
-        return initializingMethods;
+        return Arrays.stream(clazz.getDeclaredMethods())
+                .filter(method -> method.isAnnotationPresent(InitializerMethod.class))
+                .collect(Collectors.toList());
     }
 
     public static List<Class<?>> getAllClasses(String... packageNames) throws URISyntaxException, IOException, ClassNotFoundException {
