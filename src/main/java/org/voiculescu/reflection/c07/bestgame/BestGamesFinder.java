@@ -7,7 +7,7 @@ import java.util.*;
 import static org.voiculescu.reflection.c07.bestgame.annotations.Annotations.*;
 
 public class BestGamesFinder {
-    private Database database = new Database();
+    private final Database database = new Database();
 
     @Operation("All-Games")
     public Set<String> getAllGames() {
