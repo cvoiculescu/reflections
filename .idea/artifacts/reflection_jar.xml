@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="reflection:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/reflection_jar</output-path>
+    <root id="archive" name="reflection.jar">
+      <element id="module-output" name="reflection" />
+    </root>
+  </artifact>
+</component>
