@@ -1,4 +1,6 @@
-package org.voiculescu.reflection.c07.coding.ex9;
+package org.voiculescu.reflection.c07.coding.ex9.internal;
+
+import org.voiculescu.reflection.c07.coding.ex9.Role;
 
 import java.lang.annotation.*;
 

@@ -1,4 +1,6 @@
-package org.voiculescu.reflection.c07.coding.ex9;
+package org.voiculescu.reflection.c07.coding.ex9.internal;
+
+import org.voiculescu.reflection.c07.coding.ex9.internal.Permissions;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
