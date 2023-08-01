@@ -1,4 +1,4 @@
-package org.voiculescu.reflection.c07.coding;
+package org.voiculescu.reflection.c07.coding.ex8;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
