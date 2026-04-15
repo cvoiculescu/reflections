@@ -13,7 +13,7 @@ public class Main {
 
         Class<?> hashMapClass = mapObject.getClass();
 
-        Class<?> squareClass = Class.forName("org.voiculescu.reflection.Main$Square");
+        Class<?> squareClass = Class.forName("org.voiculescu.reflection.c01.Main$Square");
 
         printClassInfo(stringClass, hashMapClass, squareClass);
 
