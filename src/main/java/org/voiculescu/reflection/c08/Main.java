@@ -48,7 +48,7 @@ public class Main {
 
 
     @SuppressWarnings("unchecked")
-    public static <T> T createProxy(Object originalObject) {
+    private static <T> T createProxy(Object originalObject) {
         Class<?>[] interfaces = originalObject.getClass().getInterfaces();
         TimeMeasuringProxyHandler timeMeasuringProxyHandler = new TimeMeasuringProxyHandler(originalObject);
         return (T) Proxy.newProxyInstance(originalObject.getClass().getClassLoader(), interfaces, timeMeasuringProxyHandler);
